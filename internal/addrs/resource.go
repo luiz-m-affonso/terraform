@@ -393,8 +393,42 @@ func (r ConfigResource) Equal(o ConfigResource) bool {
 	return r.Module.Equal(o.Module) && r.Resource.Equal(o.Resource)
 }
 
+// Less returns true if the receiver should sort before the given other value
+// in a sorted list of addresses.
+func (r ConfigResource) Less(o ConfigResource) bool {
+	switch {
+
+	case len(r.Module) != len(o.Module):
+		return len(r.Module) < len(o.Module)
+
+	case r.Module.String() != o.Module.String():
+		return r.Module.Less(o.Module)
+
+	case r.Resource.Mode != o.Resource.Mode:
+		return r.Resource.Mode == DataResourceMode
+
+	case r.Resource.Type != o.Resource.Type:
+		return r.Resource.Type < o.Resource.Type
+
+	case r.Resource.Name != o.Resource.Name:
+		return r.Resource.Name < o.Resource.Name
+
+	default:
+		return false
+
+	}
+}
+
 func (r ConfigResource) configMoveableSigil() {
 	// AbsResource is moveable
+}
+
+type configResourceKey string
+
+func (k configResourceKey) uniqueKeySigil() {}
+
+func (r ConfigResource) UniqueKey() UniqueKey {
+	return configResourceKey(r.String())
 }
 
 // ResourceMode defines which lifecycle applies to a given resource. Each

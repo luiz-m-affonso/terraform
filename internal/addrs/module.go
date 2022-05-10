@@ -52,6 +52,24 @@ func (m Module) Equal(other Module) bool {
 	return true
 }
 
+// Less returns true if the receiver should sort before the given other value
+// in a sorted list of addresses.
+func (m Module) Less(o Module) bool {
+	if len(m) != len(o) {
+		// Shorter path sorts first.
+		return len(m) < len(o)
+	}
+
+	for i := range m {
+		mS, oS := m[i], o[i]
+		if mS != oS {
+			return mS < oS
+		}
+	}
+
+	return false
+}
+
 func (m Module) targetableSigil() {
 	// Module is targetable
 }
